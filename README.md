@@ -11,7 +11,7 @@ Type `@`, pick a person, and the mention renders as an avatar chip. Click it to 
 - **@ suggestions** while typing. Search by name, username, email or your own aliases (nicknames, romanized names…).
 - **Avatar chips** in both Reading view and Live Preview. Put the cursor inside a chip to edit the underlying link.
 - **Profile card** on hover: title, email, local time, Slack status, a “Message in Slack” button, and the notes that mention this person.
-- **Directory sync** from your Slack workspace: daily automatic sync or on demand. Bots are skipped; deactivated people are kept so old mentions still show their names.
+- **Directory sync** from your Slack workspace: daily automatic sync or on demand. Bots are skipped; deactivated people are kept so old mentions still show their names. On Enterprise Grid, where the member list only covers the token's workspace, people mentioned in your notes or added by email are looked up individually across the organization.
 - **Add by email** for people outside the synced directory.
 - **Maintenance check** that lists mentions of deactivated people or people missing from the directory.
 - English and Simplified Chinese UI, following Obsidian's language setting.

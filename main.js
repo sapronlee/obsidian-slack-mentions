@@ -25,6 +25,10 @@ const NEEDED_SCOPES = ["users:read", "users:read.email"];
 const DAY = 24 * 3600 * 1000;
 const STATUS_TTL = 5 * 60 * 1000;
 const SECRET_ID = "slack-mentions";
+const HELP_URL = {
+  en: "https://github.com/sapronlee/obsidian-slack-mentions#1-create-a-slack-token",
+  zh: "https://github.com/sapronlee/obsidian-slack-mentions/blob/main/README.zh-CN.md#1-创建-slack-token",
+};
 const LIST_LIMIT = 50;
 
 const DEFAULT_SETTINGS = {
@@ -63,6 +67,7 @@ const I18N = {
     syncing: "Syncing directory from Slack…",
     syncingN: (n) => `Syncing directory from Slack… ${n} people so far`,
     syncDone: (active, deleted) => `Sync complete: ${active} active, ${deleted} deactivated`,
+    syncExtra: (n) => ` (plus ${n} from other workspaces)`,
     syncFailed: (msg) => `Sync failed: ${msg}`,
     notInDirectory: "Not in the directory",
     deactivated: "Deactivated",
@@ -76,8 +81,8 @@ const I18N = {
     // settings
     hConnection: "Slack connection",
     tokenName: "Slack token",
-    tokenDesc: (id) =>
-      `Saved to the “${id}” entry in Obsidian's keychain (Settings → Keychain), encrypted by your OS. It never goes into your vault or git. The plugin only needs the read-only scopes users:read and users:read.email; a dedicated token with just these two is recommended.`,
+    tokenDesc: "Encrypted in Obsidian's keychain (Settings → Keychain), never written to your notes or the plugin's config files. Only the read-only scopes users:read and users:read.email are needed. ",
+    howToCreate: "How to create a token",
     tokenSaved: "Saved",
     replace: "Replace",
     tokenRemoveHint: (id) => `To remove the token, delete “${id}” in Settings → Keychain.`,
@@ -115,7 +120,7 @@ const I18N = {
     syncNowBtn: "Sync now",
     syncingBtn: "Syncing…",
     fetchedN: (n) => `${n} fetched…`,
-    syncHint: "Bots are skipped. Deactivated people stay in the directory so old mentions still show their names, but they don't appear in @ suggestions.",
+    syncHint: "Bots are skipped. Deactivated people stay in the directory so old mentions still show their names, but they don't appear in @ suggestions. On Enterprise Grid, the workspace list only covers the token's workspace; people mentioned in your notes or added by email are looked up individually on each sync.",
     hDirectory: "Directory",
     addByEmailName: "Add by email",
     addByEmailDesc: "The email must match the one registered in Slack exactly.",
@@ -127,7 +132,7 @@ const I18N = {
     searchPeople: "Search people",
     hDisplay: "Display",
     showAvatarName: "Show avatars",
-    showAvatarDesc: "Show the Slack photo when there is one, otherwise the initial. When off, chips show only the name.",
+    showAvatarDesc: "Show the Slack photo when there is one, otherwise the initial. When off, mentions show only the name.",
     clickName: "When clicking a mention",
     clickDesc: "With “Show profile card”, open Slack from the button on the card.",
     clickSlack: "Open Slack (card on hover)",
@@ -144,6 +149,7 @@ const I18N = {
     emptyDirectory: "The directory is empty. Save a token and sync, or add people by email.",
     badgeDeleted: "Deactivated",
     badgeManual: "Added manually",
+    badgeOtherWorkspace: "Other workspace",
     notesCount: (n) => (n === 1 ? "1 note" : `${n} notes`),
     aliasPlaceholder: "Aliases",
     removeFromDirectory: "Remove from directory",
@@ -176,6 +182,7 @@ const I18N = {
     syncing: "正在从 Slack 同步通讯录…",
     syncingN: (n) => `正在从 Slack 同步通讯录…已获取 ${n} 人`,
     syncDone: (active, deleted) => `同步完成：${active} 人在职，${deleted} 人已停用`,
+    syncExtra: (n) => `（另补充其他工作区 ${n} 人）`,
     syncFailed: (msg) => `同步失败：${msg}`,
     notInDirectory: "不在人员库里",
     deactivated: "账号已停用",
@@ -188,8 +195,8 @@ const I18N = {
     listSep: "、",
     hConnection: "Slack 连接",
     tokenName: "Slack token",
-    tokenDesc: (id) =>
-      `保存后存进 Obsidian 钥匙串的「${id}」一项（设置 → 钥匙串），由系统加密，不在 vault 里、不会被 git 提交。插件只需要 users:read 和 users:read.email 两个只读权限，建议单独建一个只有这两个权限的 token。`,
+    tokenDesc: "加密保存在 Obsidian 的钥匙串（设置 → 钥匙串）里，不会写进笔记或插件配置文件。只需要 users:read 和 users:read.email 两个只读权限。",
+    howToCreate: "如何创建 token",
     tokenSaved: "已保存",
     replace: "更换",
     tokenRemoveHint: (id) => `要删除 token，到「设置 → 钥匙串」删除「${id}」。`,
@@ -226,7 +233,7 @@ const I18N = {
     syncNowBtn: "立即同步",
     syncingBtn: "同步中…",
     fetchedN: (n) => `已获取 ${n} 人…`,
-    syncHint: "自动排除机器人；已停用的账号保留在库里但不出现在 @ 补全中，笔记里的旧链接仍能显示名字。",
+    syncHint: "自动排除机器人；已停用的账号保留在库里但不出现在 @ 补全中，笔记里的旧链接仍能显示名字。企业版（Enterprise Grid）的通讯录只包含 token 所在工作区的人；笔记里提到的、按邮箱添加的人，每次同步时会单独补查。",
     hDirectory: "人员库",
     addByEmailName: "按邮箱添加",
     addByEmailDesc: "邮箱必须和 Slack 上登记的完全一致。",
@@ -238,8 +245,8 @@ const I18N = {
     searchPeople: "搜索人员",
     hDisplay: "显示与交互",
     showAvatarName: "显示头像",
-    showAvatarDesc: "有 Slack 头像时显示照片，没有时显示首字。关闭后胶囊只显示名字。",
-    clickName: "点击胶囊时",
+    showAvatarDesc: "有 Slack 头像时显示照片，没有时显示首字。关闭后提及只显示名字。",
+    clickName: "点击提及时",
     clickDesc: "选「弹出资料卡」时，在资料卡里点按钮再打开 Slack。",
     clickSlack: "直接打开 Slack（悬停弹出资料卡）",
     clickCard: "弹出资料卡（不随悬停弹出）",
@@ -255,6 +262,7 @@ const I18N = {
     emptyDirectory: "人员库还是空的：保存 token 后同步通讯录，或按邮箱添加。",
     badgeDeleted: "已停用",
     badgeManual: "手动添加",
+    badgeOtherWorkspace: "其他工作区",
     notesCount: (n) => `${n} 篇笔记`,
     aliasPlaceholder: "别名",
     removeFromDirectory: "从人员库删除",
@@ -313,7 +321,8 @@ const toPerson = (m) => {
   const mm = disp.match(/^(.+?)\s*[（(]([^)）]+)[)）]$/);
   return {
     id: m.id,
-    team: m.team_id || "",
+    // Enterprise Grid user objects may omit team_id; fall back to one of the user's workspaces
+    team: m.team_id || (m.enterprise_user && m.enterprise_user.teams && m.enterprise_user.teams[0]) || "",
     name: mm ? mm[1] : disp,
     en: mm ? mm[2] : "",
     username: m.name || "",
@@ -529,13 +538,36 @@ module.exports = class SlackMentionsPlugin extends Plugin {
         const old = this.people.get(p.id);
         this.people.set(p.id, Object.assign({}, old, p, { aliases: (old && old.aliases) || [], source: "sync" }));
       }
+
+      // users.list only covers the token's workspace (Enterprise Grid has several). Look up, one by one, people who
+      // are mentioned in notes or were added by hand but weren't in that list; users.info works across the org.
+      const fetchedIds = new Set(fetched.map((p) => p.id));
+      const extraIds = new Set();
+      for (const [id, set] of this.mentions) if (set.size && !fetchedIds.has(id)) extraIds.add(id);
+      for (const p of this.people.values()) if (p.source !== "sync" && !fetchedIds.has(p.id)) extraIds.add(p.id);
+      let extra = 0;
+      for (const id of extraIds) {
+        try {
+          const { json } = await this.api("users.info", { user: id });
+          if (!json.user || json.user.is_bot) continue;
+          const p = toPerson(json.user);
+          const old = this.people.get(p.id);
+          this.people.set(p.id, Object.assign({}, old, p, { aliases: (old && old.aliases) || [], source: (old && old.source !== "sync" && old.source) || "other" }));
+          extra++;
+        } catch (e) {
+          // user_not_found etc.: leave that mention unresolved
+          if (e.code === "ratelimited" || e.code === "invalid_auth" || e.code === "token_revoked") throw e;
+        }
+        if (onProgress) onProgress(fetched.length + extra);
+        await sleep(300);
+      }
       if (!this.team && fetched.length) this.team = (fetched.find((p) => !p.deleted) || {}).team || "";
       this.store.syncedAt = Date.now();
       this.store.lastError = "";
       await this.savePeople();
       const active = fetched.filter((p) => !p.deleted).length;
-      if (notice) notice.setMessage(T.syncDone(active, fetched.length - active));
-      return { total: fetched.length, active };
+      if (notice) notice.setMessage(T.syncDone(active, fetched.length - active) + (extra ? T.syncExtra(extra) : ""));
+      return { total: fetched.length, active, extra };
     } catch (e) {
       this.store.lastError = e.message;
       await this.savePeople();
@@ -904,7 +936,12 @@ class SlackMentionsSettingTab extends PluginSettingTab {
     /* 1. Connection */
     new Setting(containerEl).setName(T.hConnection).setHeading();
     const encOk = plugin.encryptionAvailable();
-    const tokenSetting = new Setting(containerEl).setName(T.tokenName).setDesc(T.tokenDesc(SECRET_ID));
+    const tokenSetting = new Setting(containerEl).setName(T.tokenName).setDesc(
+      createFragment((f) => {
+        f.appendText(T.tokenDesc);
+        f.createEl("a", { text: T.howToCreate, href: HELP_URL[LANG] });
+      })
+    );
     if (!encOk) {
       tokenSetting.descEl.createDiv({ cls: "sp-warn", text: T.noEncryption });
     } else if (plugin.hasToken() && !this.replacingToken) {
@@ -1140,6 +1177,7 @@ class SlackMentionsSettingTab extends PluginSettingTab {
       const line = info.createDiv({ cls: "sp-row-name", text: p.name });
       if (p.en) line.createSpan({ cls: "sp-row-en", text: p.en });
       if (p.deleted) line.createSpan({ cls: "sp-badge", text: T.badgeDeleted });
+      else if (p.source === "other") line.createSpan({ cls: "sp-badge", text: T.badgeOtherWorkspace });
       else if (p.source !== "sync") line.createSpan({ cls: "sp-badge", text: T.badgeManual });
       info.createDiv({ cls: "sp-row-sub", text: [p.email, p.title].filter(Boolean).join(" · ") });
       const n = plugin.mentionCount(p.id);
