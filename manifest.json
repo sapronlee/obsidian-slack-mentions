@@ -1,0 +1,10 @@
+{
+  "id": "slack-mentions",
+  "name": "Slack Mentions",
+  "version": "1.0.0",
+  "minAppVersion": "1.11.4",
+  "description": "Mention Slack teammates with @. Mentions render as avatar chips that open Slack, with hover cards and a directory synced from your workspace.",
+  "author": "SummErOK",
+  "isDesktopOnly": true,
+  "authorUrl": "https://github.com/sapronlee"
+}

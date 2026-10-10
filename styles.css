@@ -1,0 +1,366 @@
+/* Slack Mentions: chips, profile card, suggestions and settings. Uses theme variables (falls back to Obsidian defaults). */
+body {
+  --sp-bg: var(--sc-muted, var(--background-modifier-hover));
+  --sp-bg-hover: var(--sc-accent, var(--background-modifier-active-hover));
+  --sp-fg: var(--sc-foreground, var(--text-normal));
+  --sp-faint: var(--sc-faint, var(--text-faint));
+  --sp-muted-fg: var(--sc-muted-foreground, var(--text-muted));
+  --sp-border: var(--sc-border, var(--background-modifier-border));
+  --sp-popover: var(--sc-popover, var(--background-primary));
+}
+
+/* Avatar: initial on a color derived from the Slack ID */
+.sp-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--sp-color, #64748b);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+}
+/* A Slack photo covers the initial; a failed image is removed so the initial shows again */
+.sp-avatar {
+  position: relative;
+  overflow: hidden;
+}
+.sp-avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+.sp-avatar.has-photo img {
+  opacity: 1;
+}
+.sp-avatar.is-lg {
+  width: 40px;
+  height: 40px;
+  font-size: 17px;
+}
+
+/* Chip: 22px tall, avatar 2px from the left edge, 8px right padding */
+.sp-chip,
+.markdown-rendered a.sp-chip,
+.cm-s-obsidian a.sp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px 0 2px;
+  border-radius: 999px;
+  background: var(--sp-bg);
+  color: var(--sp-fg);
+  font-size: 0.875em;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  /* Measured: at 2px the chip midline is within 0.3px of the surrounding text */
+  vertical-align: 2px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.sp-chip:hover,
+.markdown-rendered a.sp-chip:hover,
+.cm-s-obsidian a.sp-chip:hover {
+  background: var(--sp-bg-hover);
+  color: var(--sp-fg);
+  text-decoration: none;
+}
+.sp-chip .sp-name {
+  line-height: 22px;
+}
+/* Not in the directory: grey avatar and an outline */
+.sp-chip.is-unknown {
+  box-shadow: inset 0 0 0 1px var(--sp-border);
+  background: transparent;
+}
+.sp-chip.is-unknown .sp-avatar {
+  background: var(--sp-faint);
+}
+
+/* Profile card: 280px wide, 16px padding, 12px radius */
+.sp-card {
+  position: fixed;
+  z-index: var(--layer-tooltip, 70);
+  width: 280px;
+  box-sizing: border-box;
+  padding: 16px;
+  border: 1px solid var(--sp-border);
+  border-radius: 12px;
+  background: var(--sp-popover);
+  color: var(--sp-fg);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  font-size: 13px;
+  line-height: 20px;
+}
+.sp-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sp-card-who {
+  min-width: 0;
+}
+.sp-card-name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+}
+.sp-card-sub {
+  overflow: hidden;
+  color: var(--sp-faint);
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.sp-card-meta {
+  margin-top: 12px;
+  color: var(--sp-muted-fg);
+}
+.sp-card-row {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.sp-card-row.is-mono {
+  font-family: var(--font-monospace);
+  font-size: 12px;
+}
+.sp-card-btn {
+  width: 100%;
+  height: 32px;
+  margin-top: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.sp-card-notes {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--sp-border);
+}
+.sp-card-label,
+.sp-card-more {
+  color: var(--sp-faint);
+  font-size: 12px;
+  line-height: 18px;
+}
+.sp-card-label {
+  margin-bottom: 4px;
+}
+.sp-card-note {
+  display: block;
+  overflow: hidden;
+  color: var(--sp-fg);
+  text-decoration: none;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 24px;
+  cursor: pointer;
+}
+.sp-card-note:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Items in @ suggestions and the insert modal */
+.sp-suggest {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sp-suggest .sp-avatar {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+}
+.sp-suggest-text {
+  min-width: 0;
+}
+.sp-suggest-name {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+.sp-suggest-en {
+  margin-left: 6px;
+  color: var(--sp-faint);
+  font-weight: 400;
+}
+.sp-suggest-sub {
+  overflow: hidden;
+  color: var(--sp-faint);
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Deactivated: struck-through, faded name */
+.sp-chip.is-deleted .sp-name {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* ---------- Settings ---------- */
+.sp-settings .sp-warn {
+  margin-top: 6px;
+  color: var(--text-error);
+}
+.sp-settings .sp-hint {
+  margin-top: 4px;
+  color: var(--sp-faint);
+}
+.sp-test-result,
+.sp-check-result {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--sp-border);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 20px;
+}
+.sp-check-result:empty {
+  display: none;
+}
+.sp-test-row {
+  display: flex;
+  gap: 12px;
+}
+.sp-test-row + .sp-test-row {
+  margin-top: 4px;
+}
+.sp-test-key {
+  flex: none;
+  width: 48px;
+  color: var(--sp-faint);
+}
+.sp-test-val {
+  min-width: 0;
+  word-break: break-all;
+}
+.sp-test-row.is-ok {
+  color: var(--color-green);
+}
+.sp-test-row.is-warn {
+  color: var(--color-orange);
+}
+.sp-test-row.is-error {
+  color: var(--text-error);
+}
+
+.sp-people-list {
+  margin: 0 0 12px;
+  border: 1px solid var(--sp-border);
+  border-radius: 8px;
+}
+.sp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 8px 12px;
+}
+.sp-row + .sp-row {
+  border-top: 1px solid var(--sp-border);
+}
+.sp-row .sp-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 13px;
+}
+.sp-row.is-deleted {
+  opacity: 0.55;
+}
+.sp-row-info {
+  flex: 1;
+  min-width: 0;
+}
+.sp-row-name {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+.sp-row-en {
+  margin-left: 6px;
+  color: var(--sp-faint);
+  font-weight: 400;
+}
+.sp-row-sub {
+  overflow: hidden;
+  color: var(--sp-faint);
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.sp-row-count {
+  flex: none;
+  color: var(--sp-muted-fg);
+  font-size: 12px;
+}
+.sp-row-alias {
+  flex: none;
+  width: 120px;
+  height: 28px;
+  font-size: 12px;
+}
+.sp-row-del {
+  flex: none;
+}
+.sp-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--sp-bg);
+  color: var(--sp-muted-fg);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 18px;
+  vertical-align: 1px;
+}
+.sp-empty,
+.sp-more {
+  padding: 12px;
+  color: var(--sp-faint);
+  font-size: 13px;
+}
+.sp-more {
+  border-top: 1px solid var(--sp-border);
+}
+.sp-check-row + .sp-check-row {
+  margin-top: 10px;
+}
+.sp-check-who {
+  font-weight: 500;
+}
+.sp-check-files a {
+  margin-right: 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+/* Make disabled controls (no token yet) visibly disabled */
+.sp-settings button:disabled,
+.sp-settings input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.sp-token-saved {
+  flex: none;
+  white-space: nowrap;
+  color: var(--color-green);
+  font-size: 13px;
+  font-weight: 500;
+}

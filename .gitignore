@@ -1,0 +1,6 @@
+# Local plugin data, never commit
+people.json
+data.json
+
+.DS_Store
+node_modules/
